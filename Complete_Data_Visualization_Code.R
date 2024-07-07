@@ -1,16 +1,6 @@
 library(ggplot2)
 
-#reading the data frame from each unique year. This is the original data I started with. 
-injuries_2023 <- read.csv("C:/Users/rajak/OneDrive/UCLA/BSA/Data_Journalism_S24/Original_Injury_Data/injuries_2023.csv")
-injuries_2022 <- read.csv("C:/Users/rajak/OneDrive/UCLA/BSA/Data_Journalism_S24/Original_Injury_Data/injuries_2022.csv")
-injuries_2021 <- read.csv("C:/Users/rajak/OneDrive/UCLA/BSA/Data_Journalism_S24/Original_Injury_Data/injuries_2021.csv")
-injuries_2020 <- read.csv("C:/Users/rajak/OneDrive/UCLA/BSA/Data_Journalism_S24/Original_Injury_Data/injuries_2020.csv")
-injuries_2019 <- read.csv("C:/Users/rajak/OneDrive/UCLA/BSA/Data_Journalism_S24/Original_Injury_Data/injuries_2019.csv")
-injuries_2018 <- read.csv("C:/Users/rajak/OneDrive/UCLA/BSA/Data_Journalism_S24/Original_Injury_Data/injuries_2018.csv")
-injuries_2017 <- read.csv("C:/Users/rajak/OneDrive/UCLA/BSA/Data_Journalism_S24/Original_Injury_Data/injuries_2017.csv")
-injuries_2016 <- read.csv("C:/Users/rajak/OneDrive/UCLA/BSA/Data_Journalism_S24/Original_Injury_Data/injuries_2016.csv")
-
-#creating bye weeks corresponding to each team for each year
+#creating bye weeks corresponding to each team for each year. this is manual data input and therefore I did not use a loop. 
 bye_weeks_2023 <- data.frame(
   team = c("CLE", "LAC", "SEA", "TB", "GB", "PIT", "CAR", "CIN", "DAL", "HOU", "NYJ", "TEN", "DEN", "DET", "JAX", "SF", "KC", "LA", "MIA", "PHI", "ATL", "IND", "NE", "NO", "BAL", "BUF", "CHI", "LV", "MIN", "NYG", "ARI", "WAS"),
   bye = c(rep(5,4), rep(6, 2), rep(7, 6), rep(9, 4), rep(10, 4), rep(11, 4), rep(13, 6), rep(14, 2))
@@ -44,15 +34,14 @@ bye_weeks_2016 <- data.frame(
   bye = c(8, 13, 10, 11, 4, 9, 5, 11, 5, 10, 8, 6, 10, 8, 9, 9, 5, 9, 9, 8, 13, 4, 11, 7, 11, 5, 8, 10, 9, 8, 6, 7)
 )
 
-#merge each year's data frame with the year's bye weeks dataframe
-injuries_2023 <- merge(injuries_2023, bye_weeks_2023, by = "team")
-injuries_2022 <- merge(injuries_2022, bye_weeks_2022, by = "team")
-injuries_2021 <- merge(injuries_2021, bye_weeks_2021, by = "team")
-injuries_2020 <- merge(injuries_2020, bye_weeks_2020, by = "team")
-injuries_2019 <- merge(injuries_2019, bye_weeks_2019, by = "team")
-injuries_2018 <- merge(injuries_2018, bye_weeks_2018, by = "team")
-injuries_2017 <- merge(injuries_2017, bye_weeks_2017, by = "team")
-injuries_2016 <- merge(injuries_2016, bye_weeks_2016, by = "team")
+#reading the csv files for each year's data while adding a new column for bye weeks to this data. 
+years <- 2016:2023
+
+path <- "C:/Users/rajak/OneDrive/UCLA/BSA/Data_Journalism_S24/Original_Injury_Data/injuries_"
+
+for(i in years) {
+  assign(paste0("injuries_", i), merge(read.csv(paste0(path, i, ".csv")), get(paste0("bye_weeks_", i)), by = "team"))
+}
 
 #combining each dataframe into one. Selecting only regular season games and only players with a specific injury designation.
 injuries_past_2016 <- rbind(injuries_2023, injuries_2022, injuries_2021, injuries_2020, injuries_2019, injuries_2018, injuries_2017, injuries_2016)
@@ -203,7 +192,7 @@ second_bye_predict_overlay <- ggplot() +
             aes(x = week, y = injuries, color = "Original Data for Teams with Week 6 Byes"), linewidth = 1) +
   geom_point(data = week_6_bye,
              aes(x = week, y = injuries, color = "Original Data for Teams with Week 6 Byes"), size = 2.5) +
-    scale_x_continuous(breaks = 1:20) +
+  scale_x_continuous(breaks = 1:20) +
   labs(x = "Week", y = "Number of Injuries",
        title = "Number of Injuries per Team - Comparison for Predictions with 1 and with 2 Byes",
        color = "Legend") +
@@ -257,11 +246,11 @@ final_bye_predict_overlay <- ggplot() +
             aes(x = week, y = injuries, color = "Revised Prediction with Two Byes"), linewidth = 1) +
   geom_point(data = final_predict,
              aes(x = week, y = injuries, color = "Revised Prediction with Two Byes"), size = 2.5) +
-    geom_line(data = rbind(week_6_bye[17, ], week_6_week_19),
+  geom_line(data = rbind(week_6_bye[17, ], week_6_week_19),
             aes(x = week, y = injuries, color = "Prediction with One Bye"), linewidth = 1) +
   geom_point(data = week_6_week_19,
              aes(x = week, y = injuries, color = "Prediction with One Bye"), size = 2.5) +
-    geom_line(data = week_6_bye,
+  geom_line(data = week_6_bye,
             aes(x = week, y = injuries, color = "Original Data for Teams with Week 6 Byes"), linewidth = 1) +
   geom_point(data = week_6_bye,
              aes(x = week, y = injuries, color = "Original Data for Teams with Week 6 Byes"), size = 2.5) +
